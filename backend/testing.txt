@@ -1,0 +1,9 @@
+ /*every user/device will have a unique ID */
+  useEffect(() => {
+   let storedId = localStorage.getItem("userId");
+   if (!storedId) {
+    storedId = uuidv4();
+    localStorage.setItem("userId", storedId);
+   } 
+   setUserId(storedId);
+  }, []);
