@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import axios from 'axios';
+import coinIcon from "../src/assets/coin.png";
 
 function App() {
 
@@ -10,6 +11,7 @@ function App() {
   const [isBreak, setIsBreak] = useState(false);
   const [encouragement, setEncouragement] = useState("");
   const [coins, setCoins] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const cheerMessages = [
     "Keep going!",
@@ -91,6 +93,7 @@ function App() {
   const switchMode = (breakMode: boolean) => {
     setIsBreak(breakMode);
     setIsRunning(false);
+    setIsPaused(false);
     setTimeLeft(breakMode ? 5 * 60 : 1 * 60);
   }
 
@@ -105,25 +108,43 @@ function App() {
 
   }
 
+  const handleStart = () => {
+    setIsRunning(true);
+    setIsPaused(false);
+  };
+
+  const handlePause = () => {
+    setIsRunning(false);
+    setIsPaused(true);
+  };
+
+  const handleStop = () => {
+    setIsRunning(false);
+    setIsPaused(false);
+    setTimeLeft(isBreak ? 5 * 60 : 1 * 60);
+  };
+
+  const handleResume = () => {
+    setIsRunning(true);
+    setIsPaused(false);
+  };
+
+  
+
   return ( 
-    // <div style={{position: 'relative'}}>
-    <div className="container" style={{position: 'relative'}}>
     <div>
-      <button className="closeButton">
-        Close
-      </button>
-    </div>
+      <header className='app-header'>
+        <h1>Studying Smiski</h1>
+      </header>
+      <p>
+       Study and collect Smiskis  
+      </p>
+    <div className="container" style={{position: 'relative'}}>
 
     <div className="home-content">
       <div className="home-controls">
-        <button className="image-button" onClick={ () => switchMode(false)}>
-          Work
-        </button>
-        <button className="image-button" onClick={ () => switchMode(true)}>
-          Break
-        </button>
         <button className ="image-button" onClick={ () => alert(`You have ${coins} coins!`)}>
-          Coins
+          <img src={coinIcon} alt="Coin" className="coin-icon" />
         </button>
       </div>
 
@@ -133,9 +154,30 @@ function App() {
 
       <h1 className="home-timer">{formatTime(timeLeft)}</h1>
 
-      <button className="home-button" onClick={handleClick}>
+    {!isRunning && !isPaused && (
+      <button className="home-button large-button" onClick={handleStart}>
         Start
       </button>
+    )}
+      
+    {isRunning && (
+      <div className='button-group'>
+      <button className="home-button small-button" onClick={handleStop}>
+        Stop 
+      </button>
+      <button className="home-button small-button" onClick={handlePause}>
+        Pause 
+      </button>
+    
+      </div>
+    )}
+    {isPaused && (
+      <button className="home-button large-button" onClick={handleResume}>
+        Resume 
+      </button>
+    )}
+
+    </div>
     </div>
     </div>
   );
