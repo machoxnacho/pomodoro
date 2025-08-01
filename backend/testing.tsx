@@ -186,7 +186,6 @@ function App() {
               </div>
             )}
           </div>
-          
           <div className="home-controls">
             <div className="coin-display">
               <img
@@ -210,7 +209,7 @@ function App() {
 
           <h1 className="home-timer">{formatTime(timeLeft)}</h1>
 
-          {!isRunning && !isPaused && (
+           {!isRunning && !isPaused && (
             <button className="home-button large-button" onClick={handleStart}>
               Start
             </button>
@@ -230,7 +229,8 @@ function App() {
             <button className="home-button large-button" onClick={handleResume}>
               Resume 
             </button>
-          )}
+          )}  
+          
         </div>
       </div>
     </div>
@@ -275,45 +275,305 @@ function App() {
 export default App;
 
 
-// the solution 
-<div
-  className="button-group"
-  style={{
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '1rem',
-    minHeight: '48px'  // consistent height for all buttons
-  }}
->
-  <button
-    className="home-button large-button"
-    onClick={handleStart}
-    style={{ opacity: (!isRunning && !isPaused) ? 1 : 0, pointerEvents: (!isRunning && !isPaused) ? 'auto' : 'none' }}
-  >
-    Start
-  </button>
 
-  <button
-    className="home-button small-button"
-    onClick={handleStop}
-    style={{ opacity: isRunning ? 1 : 0, pointerEvents: isRunning ? 'auto' : 'none' }}
-  >
-    Stop
-  </button>
 
-  <button
-    className="home-button small-button"
-    onClick={handlePause}
-    style={{ opacity: isRunning ? 1 : 0, pointerEvents: isRunning ? 'auto' : 'none' }}
-  >
-    Pause
-  </button>
 
-  <button
-    className="home-button large-button"
-    onClick={handleResume}
-    style={{ opacity: isPaused ? 1 : 0, pointerEvents: isPaused ? 'auto' : 'none' }}
-  >
-    Resume
-  </button>
-</div>
+
+css
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap');
+
+@font-face {
+  font-family: 'Retrograde-Regular';
+  src: url('./assets/Retrograde-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: 'Retrograde-Regular', sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #7c5a51;
+  border: 8px solid #613225;  
+  border-radius: 20px; 
+  box-sizing: border-box;
+  overflow: hidden;
+  caret-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.home-container {
+  width: 400px;
+  height: 400px;
+  background-image: url('./assets/background-blue.png');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.container {
+  position: relative; /* Ensure children with absolute positioning are relative to this container */
+  width: 300px;
+  height: 325px; /* Fixed height to show exactly 4 items (2x2) */
+  border-radius: 8px; /* Optional: rounded corners */
+  border: 4px solid #613225;
+
+  display: flex; 
+  flex-direction: column;
+  background: #e5dac6;
+  justify-content: center;
+  align-items: flex-start;
+
+}
+
+.home-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
+  padding-top: 60px;
+  padding-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.app-header {
+  text-align: center;
+  font-family: "Pixelify Sans", sans-serif;
+  font-size: 1rem;
+  padding: 10px 0;
+  color: #88a591;
+  margin: 20px 0 8px 0;
+}
+
+.encouragement-text {
+  font-size: 1.25rem;
+  color: #b1cad8;
+  margin-bottom: 0.5rem;
+  animation: fadeIn 1s ease-in-out;
+  transition: opacity 0.8s ease;
+  text-align: center;
+
+}
+
+.encouragement-text.hidden {
+  opacity: 0;
+}
+
+.background-green {
+  background-image: url('./assets/background-green.png');
+}
+
+.home-controls {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+}
+
+.image-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: absolute;
+  left: 1px; 
+  top: 4px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  background: transparent;
+  border: none;
+}
+
+.coin-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: absolute;
+  left: 1px; 
+  top: 4px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  background: transparent;
+  border: none;
+}
+
+.coin-icon {
+  width: 43px;
+  height: 43px;
+}
+
+.coin-count {
+  font-size: 1rem;
+  font-weight: bold; 
+  color:#7c5a51;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.home-timer {
+  font-size: 60px;
+  color: #88a591;
+  margin: 0;
+}
+
+.gif-image {
+  height:100px;
+}
+
+.home-button {
+  border-radius: 4px;
+  border: 4px solid #613225;
+  background: #7c5a51;
+  color: #88a591;
+  text-align: center;
+  font-family: "Pixelify Sans", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  cursor: pointer
+}
+
+.large-button {
+  width: 250px;
+  height: 60px;
+  font-size: 38px;
+}
+
+.small-button {
+  width: 125px;
+  height: 50px;
+  font-size: 25px;
+  margin: 0 8px;
+}
+
+.home-button img {
+  width: 60px;
+}
+
+.menu-panel {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  width: 200px;
+  background: #fffdfa;
+  border: 2px solid #613225;
+  border-radius : 8px;
+  padding: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  font-family: 'Pixelify Sans', sans-serif;
+  z-index: 100; 
+  
+}
+
+.menu-icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: absolute;
+  left: 250px; 
+  top: 4px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  background: transparent;
+  border: none; 
+}
+
+/*Menu*/
+.shop-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(250, 240, 230, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.shop-container {
+  background: #f1e7d0;
+  border: 4px solid #613225;
+  border-radius: 12px;
+  width: 320px;
+  padding: 24px 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 1.5rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #613225;
+}
+
+.item-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.shop-item {
+  background: #fff8e1;
+  border: 3px solid #7e4c3b;
+  border-radius: 10px;
+  padding: 8px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(97, 50, 37, 0.2);
+}
+
+.shop-item img {
+  width: 80px;
+  height: auto;
+  margin-bottom: 6px;
+}
+
+.item-cost {
+  font-weight: bold;
+  color: #5a4236;
+}
+
+.shop-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.background-box {
+  background: transparent;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
