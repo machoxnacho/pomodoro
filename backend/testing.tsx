@@ -276,11 +276,19 @@ export default App;
 
 
 // the solution 
-<div className="button-group" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', minHeight: '60px' }}>
+<div
+  className="button-group"
+  style={{
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '1rem',
+    minHeight: '48px'  // consistent height for all buttons
+  }}
+>
   <button
     className="home-button large-button"
     onClick={handleStart}
-    style={{ visibility: (!isRunning && !isPaused) ? 'visible' : 'hidden' }}
+    style={{ opacity: (!isRunning && !isPaused) ? 1 : 0, pointerEvents: (!isRunning && !isPaused) ? 'auto' : 'none' }}
   >
     Start
   </button>
@@ -288,7 +296,7 @@ export default App;
   <button
     className="home-button small-button"
     onClick={handleStop}
-    style={{ visibility: isRunning ? 'visible' : 'hidden' }}
+    style={{ opacity: isRunning ? 1 : 0, pointerEvents: isRunning ? 'auto' : 'none' }}
   >
     Stop
   </button>
@@ -296,7 +304,7 @@ export default App;
   <button
     className="home-button small-button"
     onClick={handlePause}
-    style={{ visibility: isRunning ? 'visible' : 'hidden' }}
+    style={{ opacity: isRunning ? 1 : 0, pointerEvents: isRunning ? 'auto' : 'none' }}
   >
     Pause
   </button>
@@ -304,10 +312,8 @@ export default App;
   <button
     className="home-button large-button"
     onClick={handleResume}
-    style={{ visibility: isPaused ? 'visible' : 'hidden' }}
+    style={{ opacity: isPaused ? 1 : 0, pointerEvents: isPaused ? 'auto' : 'none' }}
   >
     Resume
   </button>
 </div>
-
-
