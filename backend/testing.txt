@@ -1,9 +1,31 @@
- /*every user/device will have a unique ID */
-  useEffect(() => {
-   let storedId = localStorage.getItem("userId");
-   if (!storedId) {
-    storedId = uuidv4();
-    localStorage.setItem("userId", storedId);
-   } 
-   setUserId(storedId);
-  }, []);
+return (
+  <div>
+    <header className='app-header'>
+      <h1>Studying Smiski</h1>
+    </header>
+    <p>Study and collect Smiskis</p>
+
+    <div className="container" style={{ position: 'relative' }}>
+      {/* ... your existing content ... */}
+    </div>
+
+    {/* 👇 ADD THE SHOP MENU HERE 👇 */}
+    {showShopMenu && (
+      <div className="shop-overlay">
+        <div className="shop-container">
+          <button className="close-button" onClick={() => setShowShopMenu(false)}>×</button>
+          <h2>Buy a Smiski</h2>
+          <div className="item-grid">
+            {[1, 2, 3, 4].map((id) => (
+              <div className="shop-item" key={id}>
+                <img src={`./assets/smiski${id}.png`} alt={`Smiski ${id}`} />
+                <p>Smiski #{id}</p>
+                <span className="item-cost">💰 {id * 10} coins</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+);
