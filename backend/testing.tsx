@@ -276,26 +276,38 @@ export default App;
 
 
 // the solution 
-<div className="button-group">
+<div className="button-group" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', minHeight: '60px' }}>
   <button
     className="home-button large-button"
     onClick={handleStart}
-    style={{ display: (!isRunning && !isPaused) ? 'inline-block' : 'none' }}
+    style={{ visibility: (!isRunning && !isPaused) ? 'visible' : 'hidden' }}
   >
     Start
   </button>
 
-  <div style={{ display: isRunning ? 'flex' : 'none', gap: '1rem' }}>
-    <button className="home-button small-button" onClick={handleStop}>Stop</button>
-    <button className="home-button small-button" onClick={handlePause}>Pause</button>
-  </div>
+  <button
+    className="home-button small-button"
+    onClick={handleStop}
+    style={{ visibility: isRunning ? 'visible' : 'hidden' }}
+  >
+    Stop
+  </button>
+
+  <button
+    className="home-button small-button"
+    onClick={handlePause}
+    style={{ visibility: isRunning ? 'visible' : 'hidden' }}
+  >
+    Pause
+  </button>
 
   <button
     className="home-button large-button"
     onClick={handleResume}
-    style={{ display: isPaused ? 'inline-block' : 'none' }}
+    style={{ visibility: isPaused ? 'visible' : 'hidden' }}
   >
     Resume
   </button>
 </div>
+
 
