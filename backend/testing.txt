@@ -16,6 +16,24 @@
   </div>
 )}
 
+{showCollectionMenu && (
+  <div className="shop-overlay">
+    <div className="shop-container">
+      <button className="close-button" onClick={() => setShowCollectionMenu(false)}>×</button>
+      <h2>Your Smiski Collection</h2>
+      <div className="item-grid">
+        {[1, 2, 3, 4].map((id) => (
+          <div className="shop-item" key={id}>
+            <img src={smiskiImages[id - 1]} alt={`Smiski ${id}`} />
+            <p>Smiski #{id}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+
+
 
 
 css: 
