@@ -19,3 +19,8 @@ b58ee5cb7152: Waiting
 1a12b4ea7c0c: Waiting 
 unknown: unexpected status from HEAD request to https://900546069136.dkr.ecr.us-east-1.amazonaws.com/v2/smiski-backend/smiski-backend/blobs/sha256:1f4f297e4f699ae0f384d5cc1ea42065f58a115aa0a634d427cbb186f91cb4d0: 403 Forbidden
 
+
+
+docker tag smiski-backend:latest 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest
+docker push 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest
+
