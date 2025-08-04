@@ -1,14 +1,20 @@
-# Use the official base image
-FROM rockylinux:8
+# Use official Node.js base image
+FROM node:18
 
-# Install the Apache HTTP server package from the CentOS repository
-RUN yum install httpd -y
+# Create working directory
+WORKDIR /app
 
-# Copy the index.html file from the Docker build context to the default Apache document root directory in the container
-COPY index.html /var/www/html/
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-# Specify the command to run when the container starts, which starts the Apache HTTP server in the foreground
-CMD ["/usr/sbin/httpd","-D","FOREGROUND"]
+# Install dependencies
+RUN npm install
 
-# Expose port 80 to allow incoming HTTP traffic to the container
-EXPOSE 80
+# Copy the rest of the code
+COPY . .
+
+# Expose the port your app uses
+EXPOSE 5000
+
+# Start the app
+CMD ["node", "server.js"]
