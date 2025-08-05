@@ -18,3 +18,12 @@ unknown: unexpected status from HEAD request to https://900546069136.dkr.ecr.us-
 docker tag smiski-backend:latest 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest
 docker push 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest
 
+"portMappings": [
+        {
+          "name": "smiski-backend-5000-tcp",
+          "containerPort": 5000,
+          "hostPort": 0,
+          "protocol": "tcp",
+          "appProtocol": "http"
+        }
+      ],
