@@ -27,3 +27,8 @@ docker push 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest
           "appProtocol": "http"
         }
       ],
+
+
+service smiski-backend-service was unable to place a task because no container instance met all of its requirements. The closest matching container-instance 5ed586c73a7748a8aa66067ee6ea4017 has insufficient memory available. For more information, see the Troubleshooting section of the Amazon ECS Developer Guide.
+service smiski-backend-service deployment ecs-svc/9942794867572721678 deployment failed: tasks failed to start.|Learn more 
+
