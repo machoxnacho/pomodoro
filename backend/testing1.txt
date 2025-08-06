@@ -43,3 +43,26 @@ COPY --from=backend /app/backend .
 
 EXPOSE 5000
 CMD ["node", "server.js"]
+
+ => ERROR [frontend 6/6] RUN npm run build -- --output-path=build --watch=false                                           2.5s
+------                                                                                                                         
+ > [frontend 6/6] RUN npm run build -- --output-path=build --watch=false:                                                      
+0.700                                                                                                                          
+0.700 > work-faster@0.1.0 build
+0.700 > react-scripts build --output-path=build --watch=false
+0.700 
+2.497 Could not find a required file.
+2.498   Name: index.html
+2.498   Searched in: /app/public
+------
+Dockerfile:13
+--------------------
+  11 |     
+  12 |     # Build the React app (source in ./src, output to ./build)
+  13 | >>> RUN npm run build -- --output-path=build --watch=false
+  14 |     
+  15 |     # ---- Backend build stage ----
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build -- --output-path=build --watch=false" did not complete successfully: exit code: 1
+
+View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/kh8j3p359w60o3ms2yw69fvo8
