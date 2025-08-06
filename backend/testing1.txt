@@ -54,3 +54,32 @@ COPY --from=backend /app/backend .
 EXPOSE 5000
 
 CMD ["node", "server.js"]
+
+
+
+
+
+> [frontend 7/7] RUN npm run build --prefix ./src:
+0.692 npm error code ENOENT
+0.692 npm error syscall open
+0.694 npm error path /app/src/package.json
+0.695 npm error errno -2
+0.695 npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/app/src/package.json'
+0.695 npm error enoent This is related to npm not being able to find a file.
+0.695 npm error enoent
+0.698 npm error A complete log of this run can be found in: /root/.npm/_logs/2025-08-06T16_43_25_611Z-debug-0.log
+------
+
+ 1 warning found (use docker --debug to expand):
+ - DuplicateStageName: Duplicate stage name "frontend", stage names should be unique (line 6)
+Dockerfile:21
+--------------------
+  19 |     
+  20 |     # Build the React app (output will be in /app/build)
+  21 | >>> RUN npm run build --prefix ./src
+  22 |     
+  23 |     # ---- Backend build stage ----
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build --prefix ./src" did not complete successfully: exit code: 254
+
+View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/rqx9nj6encyl95xfmb30rjmvr
