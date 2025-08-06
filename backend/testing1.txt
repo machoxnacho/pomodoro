@@ -1,26 +1,3 @@
-* Service: 
-    * changed network mode from bridge to awsvpc
-    * host port changed from 0 to 5000
-
-
-* making a new target group
-* target type: ip address because i am using awsvpc
-* name: my-tg
-* protocol HTTP 5000
-* use /health
-* change ALB listener to my-tg
-* update service 
-* use the lastest definition revision 
-* under networking, choose VPC and ur associated subnets
-* make new ecs-sg: name ecs-sg
-* add inbound custom TCP , 5000, alb-sg, click create
-* go back and add inbound ALL TCP for source of the ecs-sg
-* go back to service and add the sg of the ecs-sg that youve just created 
-* create. then go back and add load balancer
-    * self explanitory
-* Delete the instance you had so that asg can deploy a new one
-
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 900546069136.dkr.ecr.us-east-1.amazonaws.com
 
 
 docker buildx build \
@@ -28,46 +5,25 @@ docker buildx build \
   -t 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest \
   --push .
 
-=> CANCELED [frontend 2/5] WORKDIR /app                                   0.0s
- => ERROR [frontend 3/5] COPY ../src ./src                                 0.0s
-------
- > [frontend 3/5] COPY ../src ./src:
-------
-Dockerfile:5
---------------------
-   3 |     
-   4 |     WORKDIR /app
-   5 | >>> COPY ../src ./src
-   6 |     WORKDIR /app/src
-   7 |     RUN npm install && npm run build
---------------------
-ERROR: failed to build: failed to solve: failed to compute cache key: failed to calculate checksum of ref 8hhh6owfw46ix6r09gbzx03xd::uj5y5v0ftx3x6gsri1rp304ea: "/src": not found
-
-View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/nu75m2xoxws99rd26ja6qaj3s
-
-# Step 1: Build frontend
-FROM node:18-alpine AS frontend
-
+# ---- Frontend build ----
+FROM node:18-alpine as frontend
 WORKDIR /app
-COPY ../src ./src
+COPY ./src ./src
 WORKDIR /app/src
 RUN npm install && npm run build
 
-# Step 2: Backend build
-FROM node:18-alpine
-
+# ---- Backend build ----
+FROM node:18-alpine as backend
 WORKDIR /app
-
-# Copy backend
-COPY . .
-
-# Copy frontend build
-COPY --from=frontend /app/src/build ../src/build
-
-# Install backend dependencies
+COPY ./backend ./backend
+COPY --from=frontend /app/src/build ./backend/public
+WORKDIR /app/backend
 RUN npm install
 
+# ---- Final image ----
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=backend /app/backend .
+ENV NODE_ENV=production
 EXPOSE 5000
-
 CMD ["node", "server.js"]
-
