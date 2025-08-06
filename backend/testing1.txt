@@ -5,13 +5,10 @@ docker buildx build \
   -t 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest \
   --push .
 
-# ---- Frontend build stage ----
-FROM node:18-alpine AS frontend
-WORKDIR /app
-
 # Copy React app and dependencies
 COPY ./src ./src
 COPY package.json package-lock.json ./
+COPY ./public ./public
 
 # Install frontend dependencies (in root, not in src)
 RUN npm install
@@ -33,6 +30,7 @@ COPY --from=frontend /app/build ./backend/public
 # Install backend dependencies
 WORKDIR /app/backend
 RUN npm install
+RUN npm run build
 
 # ---- Final stage ----
 FROM node:18-alpine
@@ -44,25 +42,28 @@ COPY --from=backend /app/backend .
 EXPOSE 5000
 CMD ["node", "server.js"]
 
- => ERROR [frontend 6/6] RUN npm run build -- --output-path=build --watch=false                                           2.5s
+=> ERROR [frontend 7/7] RUN npm run build -- --output-path=build --watch=false                                           4.4s 
 ------                                                                                                                         
- > [frontend 6/6] RUN npm run build -- --output-path=build --watch=false:                                                      
-0.700                                                                                                                          
-0.700 > work-faster@0.1.0 build
-0.700 > react-scripts build --output-path=build --watch=false
-0.700 
-2.497 Could not find a required file.
-2.498   Name: index.html
-2.498   Searched in: /app/public
+ > [frontend 7/7] RUN npm run build -- --output-path=build --watch=false:                                                      
+0.799                                                                                                                          
+0.799 > work-faster@0.1.0 build                                                                                                
+0.799 > react-scripts build --output-path=build --watch=false                                                                  
+0.799 
+2.740 Creating an optimized production build...
+3.775 Failed to compile.
+3.775 
+3.775 Module not found: Error: Can't resolve './App' in '/app/src'
+3.775 
+3.775 
 ------
-Dockerfile:13
+Dockerfile:14
 --------------------
-  11 |     
-  12 |     # Build the React app (source in ./src, output to ./build)
-  13 | >>> RUN npm run build -- --output-path=build --watch=false
-  14 |     
-  15 |     # ---- Backend build stage ----
+  12 |     
+  13 |     # Build the React app (source in ./src, output to ./build)
+  14 | >>> RUN npm run build -- --output-path=build --watch=false
+  15 |     
+  16 |     # ---- Backend build stage ----
 --------------------
 ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build -- --output-path=build --watch=false" did not complete successfully: exit code: 1
 
-View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/kh8j3p359w60o3ms2yw69fvo8
+View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/4mwu80ceh23x5r5you5f5q9ed
