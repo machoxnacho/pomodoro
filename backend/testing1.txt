@@ -2,58 +2,37 @@ docker buildx build \
   --platform linux/amd64 \
   -t 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest \
   --push .
-
-# ---- Frontend Build Stage ----
-FROM node:18-alpine AS frontend
-WORKDIR /app
-
-# Copy React app dependencies and source
-COPY package.json package-lock.json ./
-COPY ./public ./public
-COPY ./src ./src
-
-# Debug: check files copied correctly
-RUN ls -la ./src
-
-# Install frontend dependencies and build React app
-RUN npm install
-RUN npm run build
-
-# ---- Backend Build Stage ----
-FROM node:18-alpine AS backend
-WORKDIR /app
-
-# Copy backend files and frontend build
-COPY ./backend ./backend
-COPY ./backend/package.json ./backend/package-lock.json ./backend/
-COPY --from=frontend /app/build ./backend/public
-
-# Install backend dependencies
-WORKDIR /app/backend
-RUN npm install
-
-# ---- Final Stage ----
-FROM node:18-alpine
-WORKDIR /app
-
-COPY --from=backend /app/backend .
-
-EXPOSE 5000
-CMD ["node", "server.js"]
-
- => ERROR [frontend 8/8] RUN npm run build                                                                         3.8s 
+[+] Building 4.8s (14/18)                                                               docker-container:relaxed_diffie
+ => [internal] load build definition from Dockerfile                                                               0.0s
+ => => transferring dockerfile: 841B                                                                               0.0s
+ => [internal] load metadata for docker.io/library/node:18-alpine                                                  0.3s
+ => [internal] load .dockerignore                                                                                  0.0s
+ => => transferring context: 2B                                                                                    0.0s
+ => [internal] load build context                                                                                  0.5s
+ => => transferring context: 691.77kB                                                                              0.5s
+ => [frontend 1/8] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35  0.0s
+ => => resolve docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8c  0.0s
+ => CACHED [frontend 2/8] WORKDIR /app                                                                             0.0s
+ => CACHED [frontend 3/8] COPY package.json package-lock.json ./                                                   0.0s
+ => CACHED [frontend 4/8] COPY ./public ./public                                                                   0.0s
+ => CACHED [frontend 5/8] COPY ./src ./src                                                                         0.0s
+ => CACHED [frontend 6/8] RUN ls -la ./src                                                                         0.0s
+ => CACHED [frontend 7/8] RUN npm install                                                                          0.0s
+ => ERROR [frontend 8/8] RUN npm run build                                                                         3.8s
+ => CACHED [backend 3/7] COPY ./backend ./backend                                                                  0.0s
+ => CACHED [backend 4/7] COPY ./backend/package.json ./backend/package-lock.json ./backend/                        0.0s
 ------                                                                                                                  
  > [frontend 8/8] RUN npm run build:                                                                                    
-0.797                                                                                                                   
-0.797 > work-faster@0.1.0 build                                                                                         
-0.797 > react-scripts build                                                                                             
-0.797 
-2.720 Creating an optimized production build...
-3.671 Failed to compile.
-3.671 
-3.671 Module not found: Error: Can't resolve './App' in '/app/src'
-3.671 
-3.671 
+0.686                                                                                                                   
+0.686 > work-faster@0.1.0 build                                                                                         
+0.686 > react-scripts build
+0.686 
+2.763 Creating an optimized production build...
+3.755 Failed to compile.
+3.755 
+3.755 Module not found: Error: Can't resolve './App' in '/app/src'
+3.755 
+3.755 
 ------
 Dockerfile:15
 --------------------
@@ -65,5 +44,6 @@ Dockerfile:15
 --------------------
 ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
 
+View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/5glxu1fih56t32ss6o5ovihe2
 
 
