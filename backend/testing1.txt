@@ -28,7 +28,22 @@ docker buildx build \
   -t 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest \
   --push .
 
+=> CANCELED [frontend 2/5] WORKDIR /app                                   0.0s
+ => ERROR [frontend 3/5] COPY ../src ./src                                 0.0s
+------
+ > [frontend 3/5] COPY ../src ./src:
+------
+Dockerfile:5
+--------------------
+   3 |     
+   4 |     WORKDIR /app
+   5 | >>> COPY ../src ./src
+   6 |     WORKDIR /app/src
+   7 |     RUN npm install && npm run build
+--------------------
+ERROR: failed to build: failed to solve: failed to compute cache key: failed to calculate checksum of ref 8hhh6owfw46ix6r09gbzx03xd::uj5y5v0ftx3x6gsri1rp304ea: "/src": not found
 
+View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/nu75m2xoxws99rd26ja6qaj3s
 
 # Step 1: Build frontend
 FROM node:18-alpine AS frontend
