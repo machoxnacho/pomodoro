@@ -20,6 +20,9 @@
     * self explanitory
 * Delete the instance you had so that asg can deploy a new one
 
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 900546069136.dkr.ecr.us-east-1.amazonaws.com
+
+
 docker buildx build \
   --platform linux/amd64 \
   -t 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest \
