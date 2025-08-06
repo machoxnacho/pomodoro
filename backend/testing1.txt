@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Copy frontend files (assuming React app is under src/)
 COPY ./src ./src
-COPY package.json package-lock.json* ./  # copy package files if frontend deps are here, else adjust
+COPY package.json package-lock.json ./  # Fixed line, removed '*'
 RUN npm install
 RUN npm run build --prefix ./src
 
@@ -36,19 +36,3 @@ COPY --from=backend /app/backend .
 EXPOSE 5000
 CMD ["node", "server.js"]
 
-
- => ERROR [frontend 4/6] COPY package.json package-lock.json* ./  # copy package files if frontend deps are here, else a  0.1s
-------
- > [frontend 4/6] COPY package.json package-lock.json* ./  # copy package files if frontend deps are here, else adjust:
-------
-Dockerfile:7
---------------------
-   5 |     # Copy frontend files (assuming React app is under src/)
-   6 |     COPY ./src ./src
-   7 | >>> COPY package.json package-lock.json* ./  # copy package files if frontend deps are here, else adjust
-   8 |     RUN npm install
-   9 |     RUN npm run build --prefix ./src
---------------------
-ERROR: failed to build: failed to solve: cannot copy to non-directory: /var/lib/buildkit/runc-overlayfs/cachemounts/buildkit640933122/app/adjust
-
-View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/x2j6rzytljmgfhicnx57zi57w
