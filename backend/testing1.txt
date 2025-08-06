@@ -1,299 +1,40 @@
-ls -la src/
-total 120
-drwxr-xr-x  15 bntran  staff   480 Aug  6 15:42 .
-drwxr-xr-x  16 bntran  staff   512 Aug  6 11:54 ..
--rw-r--r--@  1 bntran  staff  6148 Jul 31 17:04 .DS_Store
--rw-r--r--@  1 bntran  staff  5667 Aug  4 15:43 App.css
--rw-r--r--   1 bntran  staff   273 Jul 29 11:17 App.test.tsx
--rw-r--r--@  1 bntran  staff  8097 Aug  3 02:06 App.tsx
--rw-r--r--@  1 bntran  staff  1189 Aug  6 15:42 App.txt
-drwxr-xr-x@ 12 bntran  staff   384 Aug  4 15:42 assets
--rw-r--r--@  1 bntran  staff    73 Aug  3 02:10 declarations.d.ts
--rw-r--r--   1 bntran  staff   366 Jul 29 11:17 index.css
--rw-r--r--   1 bntran  staff   554 Jul 29 11:17 index.tsx
--rw-r--r--   1 bntran  staff  2632 Jul 29 11:17 logo.svg
--rw-r--r--   1 bntran  staff    40 Jul 29 11:17 react-app-env.d.ts
--rw-r--r--   1 bntran  staff   425 Jul 29 11:17 reportWebVitals.ts
--rw-r--r--   1 bntran  staff   241 Jul 29 11:17 setupTests.ts
-bntran@a078178d7806 work-faster % cat ./src/App.tsx
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import axios from 'axios';
-import coinIcon from "../src/assets/coin.png";
-import menuIcon from "../src/assets/menu.png";
-import smiski1 from "../src/assets/smiski1.png";
-import smiski2 from "../src/assets/smiski2.png";
-import smiski3 from "../src/assets/smiski3.png";
-import smiski4 from "../src/assets/smiski4.png";
-import alarmSound from "../src/assets/alarm.mp3";
+# ---- Frontend Build Stage ----
+FROM node:18-alpine AS frontend
+WORKDIR /app
 
+# Copy React app dependencies and source code
+COPY package.json package-lock.json ./
+COPY public ./public
+COPY src ./src
 
-import { v4 as uuidv4 } from 'uuid';
+# Debugging: list files and check index.tsx to verify correct copy
+RUN ls -la ./src
+RUN cat ./src/index.tsx
 
-function App() {
+# Install dependencies and build React app
+RUN npm install
+RUN npm run build
 
-  const [timeLeft, setTimeLeft] = useState(1*60);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isBreak, setIsBreak] = useState(false);
-  const [encouragement, setEncouragement] = useState("");
-  const [coins, setCoins] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const [userId, setUserId] = useState("");
-  const [showShopMenu, setShowShopMenu] = useState(false);
-  const smiskiImages = [smiski1, smiski2, smiski3, smiski4];
-  const [showCollectionMenu, setShowCollectionMenu] = useState(false);
-  const alarm = new Audio(alarmSound);
+# ---- Backend Build Stage ----
+FROM node:18-alpine AS backend
+WORKDIR /app/backend
 
+# Copy backend files and package files
+COPY backend/package.json backend/package-lock.json ./
+COPY backend ./ 
 
-  const cheerMessages = [
-    "Keep going!",
-    "You can do it!",
-    "You're doing so well!",
-    "Stay focused!"
-  ]
+# Copy frontend build output from frontend stage into backend public folder
+COPY --from=frontend /app/build ./public
 
-  const breakMessages = [
-    "Relax", 
-    "You've earned this break", 
-    "Refuel and recharge",
-    "Stay hydrated!"
-  ]
+# Install backend dependencies
+RUN npm install
 
-  /*every user/device will have a unique ID */
-  useEffect(() => {
-   let storedId = localStorage.getItem("userId");
-   if (!storedId) {
-    storedId = uuidv4();
-    localStorage.setItem("userId", storedId);
-   } 
-   setUserId(storedId);
+# ---- Final Stage ----
+FROM node:18-alpine
+WORKDIR /app
 
-   // fetch stats for userId
-   axios.get(`http://localhost:5000/stats/${storedId}`)
-    .then(res => {
-      setCoins(res.data.coins);
-      // set other user re;ated data if needed
-    })
-    .catch(err => console.error(err));
-  }, []);
+# Copy backend (with frontend build inside public) to final image
+COPY --from=backend /app/backend .
 
-  /*encouragement message updater*/
-  useEffect(() => {
-    let messageInterval: NodeJS.Timeout;
-
-    if (isRunning) {
-      const messages = isBreak ? breakMessages : cheerMessages;
-      setEncouragement(messages[0]); // set first message initially 
-      let index = 1;
-
-      messageInterval = setInterval(() => {
-        setEncouragement(messages[index]);
-        index = (index + 1) % messages.length;
-      }, 40000);  
-    } else {
-      setEncouragement("");
-    }
-
-    return () => clearInterval(messageInterval);
-  }, [isRunning, isBreak]);
-
-  /*countdown timer*/
-  /*timer component. starts timer, time countdown, and stop and cleans up timer*/
-  useEffect( () => {
-    let timer: NodeJS.Timeout;
-
-    if (isRunning) {
-      if (timeLeft > 0) {
-        timer = setInterval(() => {
-          setTimeLeft(prev => prev - 1);
-        }, 1000);
-      } else {
-        // time is up
-        alarm.play().catch(err => console.error("Audio play failed", err)) // alarm sound
-        setIsRunning(false); // stop timer
-
-        if (!isBreak) {
-          // finish a work session and reward coins
-          axios.post('http://localhost:5000/complete-cycle', { userId })
-          .then(res => {
-            setCoins(res.data.data.coins);
-          })
-          .catch(err => console.error(err));
-
-          // prepare for break, do not auto start
-          setIsBreak(true);
-          setTimeLeft(5* 60); // break duration
-        } else {
-          // finish a break, prepare work session 
-          alarm.play().catch(err => console.error("Audio play failed", err)) // alarm sound
-          setIsBreak(false);
-          setTimeLeft(1 * 60);
-        }
-      }
-    }
-    
-    return () => clearInterval(timer);
-  }, [isRunning, timeLeft, isBreak]);
-
-  /*formatting the time for 2 digits in minutes and seconds*/
-  const formatTime = (seconds: number): string => {
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-
-    const s = (seconds % 60).toString().padStart(2,'0');
-    return `${m}:${s}`;
-  };
-
-  /*function for work and break button*/
-  const switchMode = (breakMode: boolean) => {
-    setIsBreak(breakMode);
-    setIsRunning(false);
-    setIsPaused(false);
-    setTimeLeft(breakMode ? 5 * 60 : 1 * 60);
-  }
-
-  const handleStart = () => {
-    setIsRunning(true);
-    setIsPaused(false);
-  };
-
-  const handlePause = () => {
-    setIsRunning(false);
-    setIsPaused(true);
-  };
-
-  const handleStop = () => {
-    setIsRunning(false);
-    setIsPaused(false);
-    setTimeLeft(isBreak ? 5 * 60 : 1 * 60);
-  };
-
-  const handleResume = () => {
-    setIsRunning(true);
-    setIsPaused(false);
-  };
-
-  
-
-  return ( 
-    <div>
-      <div>
-      <header className='app-header'>
-        <h1>Studying Smiski</h1>
-      </header>
-      <header className='app-paragraph'>
-       Study, acquire clovers, and grow your smiski collection 
-      </header>
-      </div>
-      <div className="container" style={{position: 'relative'}}>
-        {/* <div
-        className="background-box"
-        style={{
-          backgroundImage: `url(${bgsmiski})`,
-          backgroundSize: 'cover', 
-          backgroundPosition: 'center', 
-          padding: `2rem`,
-          position: 'relative', 
-        }}
-        > */}
-          
-          <div className="home-content">
-            <div>
-            {showMenu && (
-              <div className="menu-panel">
-                <div className='menu-panel'>
-                  <h3>Menu</h3>
-                  <p>Menu to buy Smiski!</p>
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="home-controls">
-            <div className="coin-display">
-              <img
-              src={coinIcon}
-              alt="Coin"
-              className="coin-icon"
-              onClick={() => setShowShopMenu(true)}
-              style={{ cursor: 'pointer' }}
-              />
-              <span className="coint-count">{coins}</span>
-            </div>
-            <div>
-            <button className='image-button' onClick={() => setShowCollectionMenu(true)}>
-              <img src={menuIcon} alt="Menu" className='menu-icon' />
-            </button>
-            </div>
-          </div>
-
-          <p className ={`encouragement-text ${!isRunning ? "hidden" : ""}`}>
-            { encouragement }
-          </p>
-
-          <h1 className="home-timer">{formatTime(timeLeft)}</h1>
-
-           {!isRunning && !isPaused && (
-            <button className="home-button large-button" onClick={handleStart}>
-              Start
-            </button>
-          )}
-        
-          {isRunning && (
-            <div className='button-group'>
-            <button className="home-button small-button" onClick={handleStop}>
-              Stop 
-            </button>
-            <button className="home-button small-button" onClick={handlePause}>
-              Pause 
-            </button>
-            </div>
-          )}
-          {isPaused && (
-            <button className="home-button large-button" onClick={handleResume}>
-              Resume 
-            </button>
-          )}  
-          
-        {/* </div> */}
-      </div>
-    </div>
-    {showShopMenu && (
-  <div className="shop-overlay">
-    <div className="shop-container">
-      <button className="close-button" onClick={() => setShowShopMenu(false)}>×</button>
-      <h2>Smiski Shop</h2>
-      <div className="item-grid">
-        {smiskiImages.map((imgSrc, index) => (
-          <div className="shop-item" key={index}>
-            <img src={imgSrc} alt={`Smiski ${index + 1}`} />
-            <p></p>
-            <span className="item-cost"> 20 coins</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-)}
-
-    {showCollectionMenu && (
-  <div className="shop-overlay">
-    <div className="shop-container">
-      <button className="close-button" onClick={() => setShowCollectionMenu(false)}>×</button>
-      <h2>My Smiski Collection</h2>
-      <div className="item-grid">
-        {[1, 2].map((id) => (
-          <div className="shop-item" key={id}>
-            <img src={smiskiImages[id - 1]} alt={`Smiski ${id}`} />
-            <p>Smiski #{id}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-)}
-    </div>
-  );
-}
-
-export default App;
+EXPOSE 5000
+CMD ["node", "server.js"]
