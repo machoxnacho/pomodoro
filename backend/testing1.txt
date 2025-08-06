@@ -36,9 +36,7 @@ COPY --from=backend /app/backend .
 EXPOSE 5000
 CMD ["node", "server.js"]
 
-
-
- => ERROR [frontend 4/6] COPY package.json package-lock.json* ./  # copy package files if frontend deps are here, else a  0.7s
+ => ERROR [frontend 4/6] COPY package.json package-lock.json* ./  # copy package files if frontend deps are here, else a  0.1s
 ------
  > [frontend 4/6] COPY package.json package-lock.json* ./  # copy package files if frontend deps are here, else adjust:
 ------
@@ -50,6 +48,6 @@ Dockerfile:7
    8 |     RUN npm install
    9 |     RUN npm run build --prefix ./src
 --------------------
-ERROR: failed to build: failed to solve: cannot copy to non-directory: /var/lib/buildkit/runc-overlayfs/cachemounts/buildkit1915660255/app/adjust
+ERROR: failed to build: failed to solve: cannot copy to non-directory: /var/lib/buildkit/runc-overlayfs/cachemounts/buildkit640933122/app/adjust
 
-View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/9xz78yloz1z7oyrhhanmt9a8c
+View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/x2j6rzytljmgfhicnx57zi57w
