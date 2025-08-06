@@ -5,30 +5,33 @@ docker buildx build \
   -t 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest \
   --push .
 
- => ERROR [frontend 5/5] RUN npm install && npm run build                                                                 1.4s
-------                                                                                                                         
- > [frontend 5/5] RUN npm install && npm run build:
-1.369 npm error code ENOENT
-1.369 npm error syscall open
-1.369 npm error path /app/src/package.json
-1.370 npm error errno -2
-1.370 npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/app/src/package.json'
-1.371 npm error enoent This is related to npm not being able to find a file.
-1.371 npm error enoent
-1.372 npm error A complete log of this run can be found in: /root/.npm/_logs/2025-08-06T15_56_09_184Z-debug-0.log
-------
+# Frontend build stage
+FROM node:18-alpine AS frontend
+WORKDIR /app
 
- 2 warnings found (use docker --debug to expand):
- - FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 9)
- - FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 2)
-Dockerfile:6
---------------------
-   4 |     COPY ./src ./src
-   5 |     WORKDIR /app/src
-   6 | >>> RUN npm install && npm run build
-   7 |     
-   8 |     # ---- Backend build ----
---------------------
-ERROR: failed to build: failed to solve: process "/bin/sh -c npm install && npm run build" did not complete successfully: exit code: 254
+# Copy frontend files (assuming React app is under src/)
+COPY ./src ./src
+COPY package.json package-lock.json* ./  # copy package files if frontend deps are here, else adjust
+RUN npm install
+RUN npm run build --prefix ./src
 
-View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/n5763l6h618f2ha630jvxbz81
+# Backend build stage
+FROM node:18-alpine AS backend
+WORKDIR /app
+
+# Copy backend files
+COPY ./backend ./backend
+COPY package.json package-lock.json* ./
+
+# Copy built frontend files from frontend stage into backend/public
+COPY --from=frontend /app/src/build ./backend/public
+
+WORKDIR /app/backend
+RUN npm install
+
+# Final stage
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=backend /app/backend .
+EXPOSE 5000
+CMD ["node", "server.js"]
