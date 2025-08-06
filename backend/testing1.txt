@@ -3,43 +3,39 @@ docker buildx build \
   -t 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest \
   --push .
 
-
 # ---- Frontend Build Stage ----
 FROM node:18-alpine AS frontend
-WORKDIR /app
+WORKDIR /frontend
 
-# Copy React app dependencies and source
+# Copy only frontend-specific files
 COPY package.json package-lock.json ./
-COPY ./public ./public
-COPY ./src ./src
+COPY public/ ./public/
+COPY src/ ./src/
 
-# Debug: check files copied correctly
-RUN ls -la ./src
-
-# Install frontend dependencies and build React app
+# Install dependencies and build the React app
 RUN npm install
 RUN npm run build
 
 # ---- Backend Build Stage ----
 FROM node:18-alpine AS backend
-WORKDIR /app
+WORKDIR /backend
 
-# Copy backend files and frontend build
-COPY ./backend ./backend
-COPY ./backend/package.json ./backend/package-lock.json ./backend/
-COPY --from=frontend /app/build ./backend/public
+# Copy backend files
+COPY backend/package.json backend/package-lock.json ./
+COPY backend/ ./
+
+# Copy built frontend into backend/public
+COPY --from=frontend /frontend/build ./public
 
 # Install backend dependencies
-WORKDIR /app/backend
 RUN npm install
 
 # ---- Final Stage ----
 FROM node:18-alpine
 WORKDIR /app
 
-COPY --from=backend /app/backend .
+# Copy everything from backend stage into final image
+COPY --from=backend /backend .
 
 EXPOSE 5000
-CMD ["node", "server.js"]%    
-
-
+CMD ["node", "server.js"]
