@@ -3,71 +3,22 @@ work-faster % docker buildx build \
   -t 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest \
   --push .
 
-# ---- Frontend Build Stage ----
-FROM node:18-alpine AS frontend
-WORKDIR /app
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
 
-# Copy React app dependencies and source code
-COPY package.json package-lock.json ./
-COPY public ./public
-COPY src ./src
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
 
-# Debugging: list files and check index.tsx to verify correct copy
-RUN ls -la ./src
-RUN cat ./src/index.tsx
-
-# Install dependencies and build React app
-RUN npm install
-RUN npm run build
-
-# ---- Backend Build Stage ----
-FROM node:18-alpine AS backend
-WORKDIR /app/backend
-
-# Copy backend files and package files
-COPY backend/package.json backend/package-lock.json ./
-COPY backend ./ 
-
-# Copy frontend build output from frontend stage into backend public folder
-COPY --from=frontend /app/build ./public
-
-# Install backend dependencies
-RUN npm install
-
-# ---- Final Stage ----
-FROM node:18-alpine
-WORKDIR /app
-
-# Copy backend (with frontend build inside public) to final image
-COPY --from=backend /app/backend .
-
-EXPOSE 5000
-CMD ["node", "server.js"]
-
-
-
- => ERROR [frontend 9/9] RUN npm run build                                                                         4.5s 
-------                                                                                                                  
- > [frontend 9/9] RUN npm run build:                                                                                    
-0.819                                                                                                                   
-0.819 > work-faster@0.1.0 build                                                                                         
-0.819 > react-scripts build                                                                                             
-0.819 
-2.815 Creating an optimized production build...
-3.799 Failed to compile.
-3.799 
-3.800 Module not found: Error: Can't resolve './App' in '/app/src'
-3.800 
-3.800 
-------
-Dockerfile:16
---------------------
-  14 |     # Install dependencies and build React app
-  15 |     RUN npm install
-  16 | >>> RUN npm run build
-  17 |     
-  18 |     # ---- Backend Build Stage ----
---------------------
-ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
-
-View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/ufs2yllmzushsuik6nwewry15
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
