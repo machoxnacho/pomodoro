@@ -1,3 +1,8 @@
+work-faster % docker buildx build \
+  --platform linux/amd64 \
+  -t 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest \
+  --push .
+
 # ---- Frontend Build Stage ----
 FROM node:18-alpine AS frontend
 WORKDIR /app
