@@ -21,7 +21,7 @@ WORKDIR /app
 
 # Copy backend files
 COPY ./backend ./backend
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
 
 # Copy built frontend files from frontend stage into backend/public
 COPY --from=frontend /app/src/build ./backend/public
@@ -35,6 +35,7 @@ WORKDIR /app
 COPY --from=backend /app/backend .
 EXPOSE 5000
 CMD ["node", "server.js"]
+
 
  => ERROR [frontend 4/6] COPY package.json package-lock.json* ./  # copy package files if frontend deps are here, else a  0.1s
 ------
