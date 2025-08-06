@@ -36,3 +36,27 @@ COPY --from=backend /app/backend .
 EXPOSE 5000
 CMD ["node", "server.js"]
 
+
+=> ERROR [frontend 6/6] RUN npm run build --prefix ./src                                                                 0.8s 
+------                                                                                                                         
+ > [frontend 6/6] RUN npm run build --prefix ./src:                                                                            
+0.804 npm error code ENOENT                                                                                                    
+0.805 npm error syscall open                                                                                                   
+0.807 npm error path /app/src/package.json                                                                                     
+0.807 npm error errno -2
+0.807 npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/app/src/package.json'
+0.807 npm error enoent This is related to npm not being able to find a file.
+0.807 npm error enoent
+0.811 npm error A complete log of this run can be found in: /root/.npm/_logs/2025-08-06T16_09_21_642Z-debug-0.log
+------
+Dockerfile:9
+--------------------
+   7 |     COPY package.json package-lock.json ./ 
+   8 |     RUN npm install
+   9 | >>> RUN npm run build --prefix ./src
+  10 |     
+  11 |     # Backend build stage
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build --prefix ./src" did not complete successfully: exit code: 254
+
+View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/ih99i803khos7h6ob2mhtqy7b
