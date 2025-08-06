@@ -5,68 +5,52 @@ docker buildx build \
   -t 900546069136.dkr.ecr.us-east-1.amazonaws.com/smiski-backend:latest \
   --push .
 
+
 # ---- Frontend build stage ----
 FROM node:18-alpine AS frontend
+
 WORKDIR /app
 
-# Copy React app
+# Copy frontend source and public assets
 COPY ./src ./src
 COPY ./public ./public
+
+# Copy frontend package files (if separate), else copy root package.json if frontend deps are there
 COPY package.json package-lock.json ./
 
-# Install frontend dependencies and build
+# Install frontend dependencies
 RUN npm install
-RUN npm run build -- --output-path=build --watch=false
+
+# Build the React app (output will be in /app/build)
+RUN npm run build --prefix ./src
 
 # ---- Backend build stage ----
 FROM node:18-alpine AS backend
+
 WORKDIR /app
 
-# Copy backend files
+# Copy backend source
 COPY ./backend ./backend
+
+# Copy backend package files (important for npm install)
 COPY ./backend/package.json ./backend/package-lock.json ./backend/
 
-# Copy built frontend into backend/public
-COPY --from=frontend /app/build ./backend/public
+# Copy built frontend from previous stage into backend/public
+COPY --from=frontend /app/src/build ./backend/public
+
+WORKDIR /app/backend
 
 # Install backend dependencies
-WORKDIR /app/backend
 RUN npm install
 
-# ---- Final stage ----
+# ---- Final image ----
 FROM node:18-alpine
+
 WORKDIR /app
 
+# Copy backend including built frontend
 COPY --from=backend /app/backend .
 
 EXPOSE 5000
+
 CMD ["node", "server.js"]
-
- => ERROR [frontend 7/7] RUN npm run build -- --output-path=build --watch=false                                           4.3s 
-------                                                                                                                         
- > [frontend 7/7] RUN npm run build -- --output-path=build --watch=false:                                                      
-0.798                                                                                                                          
-0.798 > work-faster@0.1.0 build                                                                                                
-0.798 > react-scripts build --output-path=build --watch=false                                                                  
-0.798 
-2.720 Creating an optimized production build...
-3.667 Failed to compile.
-3.667 
-3.668 Module not found: Error: Can't resolve './App' in '/app/src'
-3.668 
-3.668 
-------
-
- 1 warning found (use docker --debug to expand):
- - DuplicateStageName: Duplicate stage name "frontend", stage names should be unique (line 6)
-Dockerfile:16
---------------------
-  14 |     # Install frontend dependencies and build
-  15 |     RUN npm install
-  16 | >>> RUN npm run build -- --output-path=build --watch=false
-  17 |     
-  18 |     # ---- Backend build stage ----
---------------------
-ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build -- --output-path=build --watch=false" did not complete successfully: exit code: 1
-
-View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/wmrz12q2e0eax865fur4hrq2t
