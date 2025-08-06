@@ -43,3 +43,31 @@ COPY --from=backend /app/backend .
 
 EXPOSE 5000
 CMD ["node", "server.js"]
+
+
+
+ => ERROR [frontend 9/9] RUN npm run build                                                                         4.5s 
+------                                                                                                                  
+ > [frontend 9/9] RUN npm run build:                                                                                    
+0.819                                                                                                                   
+0.819 > work-faster@0.1.0 build                                                                                         
+0.819 > react-scripts build                                                                                             
+0.819 
+2.815 Creating an optimized production build...
+3.799 Failed to compile.
+3.799 
+3.800 Module not found: Error: Can't resolve './App' in '/app/src'
+3.800 
+3.800 
+------
+Dockerfile:16
+--------------------
+  14 |     # Install dependencies and build React app
+  15 |     RUN npm install
+  16 | >>> RUN npm run build
+  17 |     
+  18 |     # ---- Backend Build Stage ----
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+
+View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/ufs2yllmzushsuik6nwewry15
