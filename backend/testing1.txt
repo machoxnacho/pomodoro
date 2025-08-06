@@ -42,3 +42,31 @@ COPY --from=backend /app/backend .
 EXPOSE 5000
 CMD ["node", "server.js"]
 
+ => ERROR [frontend 7/7] RUN npm run build -- --output-path=build --watch=false                                           4.3s 
+------                                                                                                                         
+ > [frontend 7/7] RUN npm run build -- --output-path=build --watch=false:                                                      
+0.798                                                                                                                          
+0.798 > work-faster@0.1.0 build                                                                                                
+0.798 > react-scripts build --output-path=build --watch=false                                                                  
+0.798 
+2.720 Creating an optimized production build...
+3.667 Failed to compile.
+3.667 
+3.668 Module not found: Error: Can't resolve './App' in '/app/src'
+3.668 
+3.668 
+------
+
+ 1 warning found (use docker --debug to expand):
+ - DuplicateStageName: Duplicate stage name "frontend", stage names should be unique (line 6)
+Dockerfile:16
+--------------------
+  14 |     # Install frontend dependencies and build
+  15 |     RUN npm install
+  16 | >>> RUN npm run build -- --output-path=build --watch=false
+  17 |     
+  18 |     # ---- Backend build stage ----
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build -- --output-path=build --watch=false" did not complete successfully: exit code: 1
+
+View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/wmrz12q2e0eax865fur4hrq2t
