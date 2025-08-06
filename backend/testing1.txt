@@ -53,3 +53,30 @@ EXPOSE 5000
 
 CMD ["node", "server.js"]
 
+
+=> ERROR [frontend 8/8] RUN npm run build                                                                                4.1s
+------                                                                                                                         
+ > [frontend 8/8] RUN npm run build:                                                                                           
+0.693                                                                                                                          
+0.693 > work-faster@0.1.0 build                                                                                                
+0.693 > react-scripts build
+0.693 
+2.864 Creating an optimized production build...
+3.967 Failed to compile.
+3.967 
+3.968 Module not found: Error: Can't resolve './App' in '/app/src'
+3.968 
+3.968 
+------
+Dockerfile:19
+--------------------
+  17 |     
+  18 |     # Build the React app (will look for src/App.tsx etc)
+  19 | >>> RUN npm run build
+  20 |     
+  21 |     # --- Backend build stage ---
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+
+View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/zs67ll3hly76hkrm2fm21j9v2
+
