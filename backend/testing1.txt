@@ -6,77 +6,48 @@ docker buildx build \
   --push .
 
 
-# --- Frontend build stage ---
+# ---- Frontend build stage ----
 FROM node:18-alpine AS frontend
 WORKDIR /app
 
-# Copy package files for frontend dependencies
+# Copy package files and frontend source
 COPY package.json package-lock.json ./
-
-# Copy React app source and public folder
 COPY ./src ./src
 COPY ./public ./public
 
-# Install dependencies
+# Debug: List files in /app and /app/src to verify copy
+RUN ls -la /app
+RUN ls -la /app/src
+
+# Install dependencies and build React app
 RUN npm install
-
-# Debug: list contents of src to ensure files are copied
-RUN ls -l /app/src
-
-# Build the React app (will look for src/App.tsx etc)
 RUN npm run build
 
-# --- Backend build stage ---
+# ---- Backend build stage ----
 FROM node:18-alpine AS backend
 WORKDIR /app
 
-# Copy backend code
+# Copy backend files
 COPY ./backend ./backend
 COPY ./backend/package.json ./backend/package-lock.json ./backend/
 
-# Copy frontend build output from frontend stage
+# Copy built frontend files into backend/public
 COPY --from=frontend /app/build ./backend/public
 
+# Install backend dependencies and build if applicable
 WORKDIR /app/backend
-
-# Install backend dependencies and build backend if needed
 RUN npm install
-RUN npm run build
+# Uncomment next line if you have a backend build step
+# RUN npm run build
 
-# --- Final stage ---
+# ---- Final stage ----
 FROM node:18-alpine
 WORKDIR /app
 
+# Copy everything from backend stage
 COPY --from=backend /app/backend .
 
 EXPOSE 5000
-
 CMD ["node", "server.js"]
 
-
-=> ERROR [frontend 8/8] RUN npm run build                                                                                4.1s
-------                                                                                                                         
- > [frontend 8/8] RUN npm run build:                                                                                           
-0.693                                                                                                                          
-0.693 > work-faster@0.1.0 build                                                                                                
-0.693 > react-scripts build
-0.693 
-2.864 Creating an optimized production build...
-3.967 Failed to compile.
-3.967 
-3.968 Module not found: Error: Can't resolve './App' in '/app/src'
-3.968 
-3.968 
-------
-Dockerfile:19
---------------------
-  17 |     
-  18 |     # Build the React app (will look for src/App.tsx etc)
-  19 | >>> RUN npm run build
-  20 |     
-  21 |     # --- Backend build stage ---
---------------------
-ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
-
-View build details: docker-desktop://dashboard/build/relaxed_diffie/relaxed_diffie0/zs67ll3hly76hkrm2fm21j9v2
 
