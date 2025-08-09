@@ -3,6 +3,15 @@ import logo from './logo.svg';
 import './App.css';
 import axios from 'axios';
 import coinIcon from "../src/assets/coin.png";
+import menuIcon from "../src/assets/menu.png";
+import smiski1 from "../src/assets/smiski1.png";
+import smiski2 from "../src/assets/smiski2.png";
+import smiski3 from "../src/assets/smiski3.png";
+import smiski4 from "../src/assets/smiski4.png";
+import alarmSound from "../src/assets/alarm.mp3";
+
+
+import { v4 as uuidv4 } from 'uuid';
 
 function App() {
 
@@ -12,6 +21,13 @@ function App() {
   const [encouragement, setEncouragement] = useState("");
   const [coins, setCoins] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [showShopMenu, setShowShopMenu] = useState(false);
+  const smiskiImages = [smiski1, smiski2, smiski3, smiski4];
+  const [showCollectionMenu, setShowCollectionMenu] = useState(false);
+  const alarm = new Audio(alarmSound);
+
 
   const cheerMessages = [
     "Keep going!",
@@ -27,12 +43,23 @@ function App() {
     "Stay hydrated!"
   ]
 
-  /*fetch coins when app loads*/
+  /*every user/device will have a unique ID */
   useEffect(() => {
-    axios.get('http://localhost:5000/stats')
-    .then(res => setCoins(res.data.coins))
+   let storedId = localStorage.getItem("userId");
+   if (!storedId) {
+    storedId = uuidv4();
+    localStorage.setItem("userId", storedId);
+   } 
+   setUserId(storedId);
+
+   // fetch stats for userId
+   axios.get(`http://localhost:5000/stats/${storedId}`)
+    .then(res => {
+      setCoins(res.data.coins);
+      // set other user re;ated data if needed
+    })
     .catch(err => console.error(err));
-  }, [])
+  }, []);
 
   /*encouragement message updater*/
   useEffect(() => {
@@ -65,21 +92,32 @@ function App() {
           setTimeLeft(prev => prev - 1);
         }, 1000);
       } else {
-        // time is up: stop timer, reward coins, and reset back to original time
-        setIsRunning(false); // stops timer
-        setTimeLeft(isBreak ? 5 * 60 : 1 * 60) // resets timer
+        // time is up
+        alarm.play().catch(err => console.error("Audio play failed", err)) // alarm sound
+        setIsRunning(false); // stop timer
 
-        // send request to backend to update coins
-        axios.post('http://localhost:5000/complete-cycle')
+        if (!isBreak) {
+          // finish a work session and reward coins
+          axios.post('http://localhost:5000/complete-cycle', { userId })
           .then(res => {
-            setCoins(res.data.data.coins); // update coins state
+            setCoins(res.data.data.coins);
           })
           .catch(err => console.error(err));
+
+          // prepare for break, do not auto start
+          setIsBreak(true);
+          setTimeLeft(5* 60); // break duration
+        } else {
+          // finish a break, prepare work session 
+          alarm.play().catch(err => console.error("Audio play failed", err)) // alarm sound
+          setIsBreak(false);
+          setTimeLeft(1 * 60);
+        }
       }
     }
-
+    
     return () => clearInterval(timer);
-  }, [isRunning, timeLeft]);
+  }, [isRunning, timeLeft, isBreak]);
 
   /*formatting the time for 2 digits in minutes and seconds*/
   const formatTime = (seconds: number): string => {
@@ -95,17 +133,6 @@ function App() {
     setIsRunning(false);
     setIsPaused(false);
     setTimeLeft(breakMode ? 5 * 60 : 1 * 60);
-  }
-
-  /*start button handler*/
-  const handleClick = () => {
-    if (!isRunning) {
-      setIsRunning(true);
-    } else {
-      setIsRunning(false);
-      setTimeLeft(isBreak ? 5 * 60 : 1 * 60);
-    }
-
   }
 
   const handleStart = () => {
@@ -133,52 +160,119 @@ function App() {
 
   return ( 
     <div>
+      <div>
       <header className='app-header'>
         <h1>Studying Smiski</h1>
       </header>
-      <p>
-       Study and collect Smiskis  
-      </p>
-    <div className="container" style={{position: 'relative'}}>
-
-    <div className="home-content">
-      <div className="home-controls">
-        <button className ="image-button" onClick={ () => alert(`You have ${coins} coins!`)}>
-          <img src={coinIcon} alt="Coin" className="coin-icon" />
-        </button>
+      <header className='app-paragraph'>
+       Study, acquire clovers, and grow your smiski collection 
+      </header>
       </div>
+      <div className="container" style={{position: 'relative'}}>
+        {/* <div
+        className="background-box"
+        style={{
+          backgroundImage: `url(${bgsmiski})`,
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center', 
+          padding: `2rem`,
+          position: 'relative', 
+        }}
+        > */}
+          
+          <div className="home-content">
+            <div>
+            {showMenu && (
+              <div className="menu-panel">
+                <div className='menu-panel'>
+                  <h3>Menu</h3>
+                  <p>Menu to buy Smiski!</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="home-controls">
+            <div className="coin-display">
+              <img
+              src={coinIcon}
+              alt="Coin"
+              className="coin-icon"
+              onClick={() => setShowShopMenu(true)}
+              style={{ cursor: 'pointer' }}
+              />
+              <span className="coint-count">{coins}</span>
+            </div>
+            <div>
+            <button className='image-button' onClick={() => setShowCollectionMenu(true)}>
+              <img src={menuIcon} alt="Menu" className='menu-icon' />
+            </button>
+            </div>
+          </div>
 
-      <p className ={`encouragement-text ${!isRunning ? "hidden" : ""}`}>
-        { encouragement }
-      </p>
+          <p className ={`encouragement-text ${!isRunning ? "hidden" : ""}`}>
+            { encouragement }
+          </p>
 
-      <h1 className="home-timer">{formatTime(timeLeft)}</h1>
+          <h1 className="home-timer">{formatTime(timeLeft)}</h1>
 
-    {!isRunning && !isPaused && (
-      <button className="home-button large-button" onClick={handleStart}>
-        Start
-      </button>
-    )}
-      
-    {isRunning && (
-      <div className='button-group'>
-      <button className="home-button small-button" onClick={handleStop}>
-        Stop 
-      </button>
-      <button className="home-button small-button" onClick={handlePause}>
-        Pause 
-      </button>
-    
+           {!isRunning && !isPaused && (
+            <button className="home-button large-button" onClick={handleStart}>
+              Start
+            </button>
+          )}
+        
+          {isRunning && (
+            <div className='button-group'>
+            <button className="home-button small-button" onClick={handleStop}>
+              Stop 
+            </button>
+            <button className="home-button small-button" onClick={handlePause}>
+              Pause 
+            </button>
+            </div>
+          )}
+          {isPaused && (
+            <button className="home-button large-button" onClick={handleResume}>
+              Resume 
+            </button>
+          )}  
+          
+        {/* </div> */}
       </div>
-    )}
-    {isPaused && (
-      <button className="home-button large-button" onClick={handleResume}>
-        Resume 
-      </button>
-    )}
+    </div>
+    {showShopMenu && (
+  <div className="shop-overlay">
+    <div className="shop-container">
+      <button className="close-button" onClick={() => setShowShopMenu(false)}>×</button>
+      <h2>Smiski Shop</h2>
+      <div className="item-grid">
+        {smiskiImages.map((imgSrc, index) => (
+          <div className="shop-item" key={index}>
+            <img src={imgSrc} alt={`Smiski ${index + 1}`} />
+            <span className="item-cost"> 20 coins</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
 
+    {showCollectionMenu && (
+  <div className="shop-overlay">
+    <div className="shop-container">
+      <button className="close-button" onClick={() => setShowCollectionMenu(false)}>×</button>
+      <h2>My Smiski Collection</h2>
+      <div className="item-grid">
+        {[1, 2].map((id) => (
+          <div className="shop-item" key={id}>
+            <img src={smiskiImages[id - 1]} alt={`Smiski ${id}`} />
+            <p>Smiski #{id}</p>
+          </div>
+        ))}
+      </div>
     </div>
-    </div>
+  </div>
+)}
     </div>
   );
 }
